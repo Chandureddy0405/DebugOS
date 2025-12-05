@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Code Debugging Playground</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+
+<body>
+    <div class="app">
+        <!-- Theme Toggle & Settings -->
+        <div class="top-bar">
+            <button id="theme-toggle" class="theme-btn" title="Toggle theme (Ctrl+Shift+T)">🌙</button>
+            <button id="settings-btn" class="settings-btn" title="Open settings">⚙️</button>
+            <button id="history-btn" class="history-btn" title="View history">📜</button>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settings-panel" class="settings-panel hidden">
+            <div class="settings-content">
+                <h3>Settings</h3>
+                <button class="close-btn" id="close-settings">✕</button>
+                
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="auto-analyze" />
+                        Auto-analyze code (real-time)
+                    </label>
+                </div>
+                
+                <div class="setting-item">
+                    <label>Default Language:</label>
+                    <select id="default-language">
+                        <option value="Python">Python</option>
+                        <option value="JavaScript">JavaScript</option>
+                        <option value="C">C</option>
+                        <option value="C++">C++</option>
+                        <option value="Java">Java</option>
+                        <option value="SQL">SQL</option>
+                    </select>
+                </div>
+
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="auto-save" checked />
+                        Auto-save code drafts
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="show-metrics" checked />
+                        Show code metrics
+                    </label>
+                </div>
+
+                <div class="setting-item">
+                    <button id="clear-history-btn" class="danger-btn">Clear History</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Panel -->
+        <div id="history-panel" class="history-panel hidden">
+            <div class="history-content">
+                <h3>Recent Analyses</h3>
+                <button class="close-btn" id="close-history">✕</button>
+                <div id="history-list" class="history-list"></div>
+            </div>
+        </div>
+
+        <header>
+            <h1>AI Code Debug</h1>
+            <p>Intelligent code analysis, bug detection, and optimization powered by AI</p>
+        </header>
+
+        <section class="controls">
+            <label for="language">Language:</label>
+            <select id="language">
+                <option value="Python">Python</option>
+                <option value="JavaScript">JavaScript</option>
+                <option value="C">C</option>
+                <option value="C++">C++</option>
+                <option value="Java">Java</option>
+                <option value="SQL">SQL</option>
+            </select>
+
+            <button id="analyze-btn" title="Analyze (Ctrl+Enter)">Analyze</button>
+            <button id="export-btn" class="export-btn" title="Export results">📥 Export</button>
+            <button id="clear-btn" class="clear-btn" title="Clear code (Ctrl+K)">Clear</button>
+        </section>
+
+        <section class="editor">
+            <label for="code-input">Paste Your Code</label>
+            <div class="editor-container">
+                <div class="line-numbers" id="line-numbers"></div>
+                <textarea id="code-input" placeholder="Write or paste your code here..."></textarea>
+            </div>
+        </section>
+
+        <!-- Code Metrics -->
+        <section id="metrics-section" class="metrics-section">
+            <div class="metric-card">
+                <span class="metric-label">Lines of Code</span>
+                <span class="metric-value" id="metric-loc">0</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Characters</span>
+                <span class="metric-value" id="metric-chars">0</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Functions</span>
+                <span class="metric-value" id="metric-funcs">0</span>
+            </div>
+            <div class="metric-card">
+                <span class="metric-label">Est. Complexity</span>
+                <span class="metric-value" id="metric-complexity">Low</span>
+            </div>
+        </section>
+
+        <section id="status" class="status hidden"></section>
+
+        <section class="results">
+            <div class="card">
+                <h2>🐛 Detected Bugs</h2>
+                <table id="bugs-table">
+                    <thead>
+                        <tr>
+                            <th>Line</th>
+                            <th>Type</th>
+                            <th>Message</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>📝 Explanation</h2>
+                <pre id="explanation"></pre>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>✅ Fixed Code</h2>
+                    <div class="card-buttons">
+                        <button class="copy-btn" data-target="fixed-code" title="Copy to clipboard">Copy</button>
+                        <button class="diff-toggle-btn" data-target="fixed" title="Show diff">Diff</button>
+                    </div>
+                </div>
+                <pre id="fixed-code" class="code-block"></pre>
+                <div id="fixed-diff" class="diff-view hidden"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>⚡ Optimized Code</h2>
+                    <div class="card-buttons">
+                        <button class="copy-btn" data-target="optimized-code" title="Copy to clipboard">Copy</button>
+                        <button class="diff-toggle-btn" data-target="optimized" title="Show diff">Diff</button>
+                    </div>
+                </div>
+                <pre id="optimized-code" class="code-block"></pre>
+                <div id="optimized-diff" class="diff-view hidden"></div>
+            </div>
+
+            <div class="card">
+                <h2>📊 Complexity</h2>
+                <p><strong>Time:</strong> <span id="time-complexity"></span></p>
+                <p><strong>Space:</strong> <span id="space-complexity"></span></p>
+            </div>
+
+            <div class="card">
+                <h2>🧪 Suggested Tests</h2>
+                <ul id="tests-list"></ul>
+            </div>
+        </section>
+
+        <footer>
+            <p>AI Code Debugging Playground – Powered by Advanced AI Analysis</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
