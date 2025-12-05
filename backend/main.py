@@ -8,7 +8,7 @@ from ai_engine import analyze_code
 
 app = FastAPI(
     title="AI Code Debugging Playground",
-    description="Simple API for analyzing and debugging code with AI.",
+    description="Simple API for analyzing   and debugging code with AI.",
     version="1.0.0"
 )
 
